@@ -165,28 +165,28 @@
         {
             //@"12.dispatch_after延时",
 
-            
+            [self dispatch_after];
         }
             break;
         case 12:
         {
             //@"13.dispatch_once 执行一次",
 
-            
+            [self dispatch_once_action];
         }
             break;
         case 13:
         {
             //@"14.dispatch_barrier_async 栅栏的作用",
 
-            
+            [self dispatch_barrier_async_action];
         }
             break;
         case 14:
         {
             //@"15.dispatch 计时器",
             
-            
+            [self dispatch_time_action];
         }
             break;
         default:
@@ -439,6 +439,73 @@
     });
  
     NSLog(@"next task");
+}
+
+//延时函数
+- (void)dispatch_after{
+
+    dispatch_time_t queue_1 = dispatch_time(DISPATCH_TIME_NOW, 3*NSEC_PER_SEC);
+    dispatch_time_t queue_2 = dispatch_time(DISPATCH_TIME_NOW, 5*NSEC_PER_SEC);
+
+    dispatch_queue_t mian_queue = dispatch_get_main_queue();
+    
+    NSLog(@"current task");
+    
+    dispatch_after(queue_1, mian_queue, ^(){
+    
+        NSLog(@"3秒之后添加到队列");
+    });
+    
+    dispatch_after(queue_2, mian_queue, ^(){
+    
+        NSLog(@"5秒之后添加到队列");
+
+    });
+}
+
+//执行一次
+- (void)dispatch_once_action{
+
+    static dispatch_once_t onceToken;
+    
+    dispatch_once(&onceToken , ^(){
+    
+        NSLog(@"执行一次方法，第二次点击不会执行");
+    });
+}
+
+//栅栏作用
+- (void)dispatch_barrier_async_action{
+    
+    //自定义并发队列
+    dispatch_queue_t conCurrentQueue = dispatch_queue_create("com.dullgrass.conCurrentQueue", DISPATCH_QUEUE_CONCURRENT);
+    
+    //2个异步并发同时执行
+    dispatch_async(conCurrentQueue, ^{
+        NSLog(@"dispatch 1");
+    });
+    dispatch_async(conCurrentQueue, ^{
+        NSLog(@"dispatch 2");
+    });
+    
+    //再执行
+    dispatch_barrier_async(conCurrentQueue, ^{
+        NSLog(@"dispatch barrier");
+    });
+    
+    //最后才会触发下面2个异步操作
+    dispatch_async(conCurrentQueue, ^{
+        NSLog(@"dispatch 3");
+    });
+    dispatch_async(conCurrentQueue, ^{
+        NSLog(@"dispatch 4");
+    });
+}
+
+//计时器
+- (void)dispatch_time_action{
+    
+    
 }
 
 - (void)didReceiveMemoryWarning {
